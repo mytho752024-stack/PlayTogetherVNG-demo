@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play Together VNG - Google Play</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', Arial, sans-serif; }
+        body { background-color: #131314; color: #e3e3e3; width: 100%; height: 100vh; overflow: hidden; }
+        #play-store-ui { width: 100%; height: 100vh; display: flex; flex-direction: column; position: relative; overflow-y: auto; padding-bottom: 70px; }
+        #play-store-ui::-webkit-scrollbar { display: none; }
+        .top-nav { display: flex; justify-content: space-between; padding: 20px; color: #e3e3e3; font-size: 22px; align-items: center; margin-top: 10px; }
+        .app-header { padding: 10px 25px; }
+        .app-top { display: flex; gap: 20px; margin-bottom: 20px; }
+        .app-icon { width: 85px; height: 85px; border-radius: 18px; object-fit: cover; background-color: #333; }
+        .app-details h1 { font-size: 24px; font-weight: 500; margin-bottom: 5px; line-height: 1.2; color: #e3e3e3; }
+        .app-dev { color: #a8c7fa; font-size: 15px; margin-bottom: 8px; font-weight: 500; }
+        .app-tags { color: #c4c7c5; font-size: 14px; font-weight: 500; }
+        .action-buttons { display: flex; gap: 15px; margin-top: 15px; width: 100%; }
+        .btn { flex: 1; padding: 12px; border-radius: 25px; font-size: 16px; font-weight: 500; text-align: center; cursor: pointer; border: none; transition: 0.2s; }
+        .btn-uninstall { background-color: transparent; border: 1px solid #8e918f; color: #e3e3e3; }
+        .btn-play { background-color: #c2e7ff; color: #001d35; display: flex; align-items: center; justify-content: center; }
+        .btn-play:active { background-color: #a8c7fa; }
+        .main-content { padding: 20px 25px; flex: 1; }
+        .achievement-section h2 { font-size: 18px; font-weight: 500; margin-bottom: 20px; color: #e3e3e3; }
+        .app-card { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .app-card-info { display: flex; align-items: center; gap: 15px; }
+        .app-card-icon { width: 60px; height: 60px; border-radius: 12px; object-fit: cover; }
+        .app-card-text h3 { font-size: 16px; font-weight: 500; margin-bottom: 4px; color: #e3e3e3; }
+        .app-card-text p { font-size: 14px; color: #c4c7c5; }
+        .btn-install { background-color: transparent; border: 1px solid #8e918f; color: #a8c7fa; padding: 8px 20px; border-radius: 20px; font-size: 14px; font-weight: 500; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+        .btn-install:active { background-color: rgba(168, 199, 250, 0.1); }
+        .bottom-nav { display: flex; justify-content: space-around; padding: 12px 0 15px 0; background-color: #1e1f22; border-top: 1px solid #333; position: fixed; bottom: 0; left: 0; width: 100%; z-index: 100; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 5px; color: #8e918f; font-size: 11px; font-weight: 500; cursor: pointer; }
+        .nav-item.active { color: #a8c7fa; }
+        .nav-icon { font-size: 22px; margin-bottom: 2px; }
+        
+        /* Thông báo nếu không mở được */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            bottom: 30px;
+            font-size: 14px;
+            transform: translateX(-50%);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <div id="play-store-ui">
+        <div class="top-nav">
+            <i class="fas fa-arrow-left"></i>
+            <i class="fas fa-ellipsis-v"></i>
+        </div>
+
+        <div class="app-header">
+            <div class="app-top">
+                <img src="https://cdn.upanhlaylink.com/i/4gq7lsCp.jpg" alt="Play Together" class="app-icon">
+                <div class="app-details">
+                    <h1>Play Together VNG beta(TRUY CẬP SỚM)</h1>
+                    <div class="app-dev">VNG | Wjilz</div>
+                    <div class="app-tags">Phiên Bản: 2.32.5</div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-uninstall">Gỡ cài đặt</button>
+                <button class="btn btn-play" onclick="moUngDung()">Chơi</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="achievement-section">
+                <h2>Thành tích mà wjilz đã đạt được</h2>
+                <div class="app-card">
+                    <div class="app-card-info">
+                        <img src="https://cdn.upanhlaylink.com/i/4gq7lsCp.jpg" alt="Play Together" class="app-card-icon">
+                        <div class="app-card-text">
+                            <h3>Play Together VNG</h3>
+                            <p>4,2 <i class="fas fa-star" style="font-size: 10px;"></i> • Mua sắm</p>
+                        </div>
+                    </div>
+                    <button class="btn-install" onclick="moUngDung()">Mở</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item"><i class="fas fa-gamepad nav-icon"></i><span>Trò chơi</span></div>
+            <div class="nav-item"><i class="fas fa-th-large nav-icon"></i><span>Ứng dụng</span></div>
+            <div class="nav-item active"><i class="fas fa-search nav-icon"></i><span>Tìm kiếm</span></div>
+            <div class="nav-item"><i class="fas fa-book nav-icon"></i><span>Sách</span></div>
+            <div class="nav-item"><i class="fas fa-user nav-icon"></i><span>Bạn</span></div>
+        </div>
+    </div>
+
+    <!-- Thông báo hướng dẫn -->
+    <div id="toast">Trình duyệt đang chặn mở App. Vui lòng bấm "Mở bằng Play Together" nếu có thông báo hiện lên!</div>
+
+    <script>
+        function moUngDung() {
+            // Tên gói chuẩn của Play Together VNG
+            var packageName = "com.vng.playtogether"; 
+            
+            // 1. Thử gọi trực tiếp bằng Intent (Cách phổ biến nhất)
+            var intentUrl = "intent://#Intent;package=" + packageName + ";scheme=vngplaytogether;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3D" + packageName + ";end";
+            
+            // Tạo một iframe ẩn để gọi Intent (Tránh bị trình duyệt chặn popup)
+            var iframe = document.createElement("iframe");
+            iframe.style.display = "none";
+            iframe.src = intentUrl;
+            document.body.appendChild(iframe);
+
+            // 2. Nếu sau 1.5 giây mà trình duyệt vẫn chưa chuyển đi (tức là bị chặn), hiện thông báo
+            setTimeout(function() {
+                // Kiểm tra xem trang có bị ẩn đi không (tức là đã chuyển sang app thành công)
+                if (!document.hidden) {
+                    var toast = document.getElementById("toast");
+                    toast.className = "show";
+                    setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+                }
+            }, 1500);
+        }
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play Together VNG - Google Play</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', Arial, sans-serif; }
+        body { background-color: #131314; color: #e3e3e3; width: 100%; height: 100vh; overflow: hidden; }
+        #play-store-ui { width: 100%; height: 100vh; display: flex; flex-direction: column; position: relative; overflow-y: auto; padding-bottom: 70px; }
+        #play-store-ui::-webkit-scrollbar { display: none; }
+        .top-nav { display: flex; justify-content: space-between; padding: 20px; color: #e3e3e3; font-size: 22px; align-items: center; margin-top: 10px; }
+        .app-header { padding: 10px 25px; }
+        .app-top { display: flex; gap: 20px; margin-bottom: 20px; }
+        .app-icon { width: 85px; height: 85px; border-radius: 18px; object-fit: cover; background-color: #333; }
+        .app-details h1 { font-size: 24px; font-weight: 500; margin-bottom: 5px; line-height: 1.2; color: #e3e3e3; }
+        .app-dev { color: #a8c7fa; font-size: 15px; margin-bottom: 8px; font-weight: 500; }
+        .app-tags { color: #c4c7c5; font-size: 14px; font-weight: 500; }
+        .action-buttons { display: flex; gap: 15px; margin-top: 15px; width: 100%; }
+        .btn { flex: 1; padding: 12px; border-radius: 25px; font-size: 16px; font-weight: 500; text-align: center; cursor: pointer; border: none; transition: 0.2s; }
+        .btn-uninstall { background-color: transparent; border: 1px solid #8e918f; color: #e3e3e3; }
+        .btn-play { background-color: #c2e7ff; color: #001d35; display: flex; align-items: center; justify-content: center; }
+        .btn-play:active { background-color: #a8c7fa; }
+        .main-content { padding: 20px 25px; flex: 1; }
+        .achievement-section h2 { font-size: 18px; font-weight: 500; margin-bottom: 20px; color: #e3e3e3; }
+        .app-card { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .app-card-info { display: flex; align-items: center; gap: 15px; }
+        .app-card-icon { width: 60px; height: 60px; border-radius: 12px; object-fit: cover; }
+        .app-card-text h3 { font-size: 16px; font-weight: 500; margin-bottom: 4px; color: #e3e3e3; }
+        .app-card-text p { font-size: 14px; color: #c4c7c5; }
+        .btn-install { background-color: transparent; border: 1px solid #8e918f; color: #a8c7fa; padding: 8px 20px; border-radius: 20px; font-size: 14px; font-weight: 500; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+        .btn-install:active { background-color: rgba(168, 199, 250, 0.1); }
+        .bottom-nav { display: flex; justify-content: space-around; padding: 12px 0 15px 0; background-color: #1e1f22; border-top: 1px solid #333; position: fixed; bottom: 0; left: 0; width: 100%; z-index: 100; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 5px; color: #8e918f; font-size: 11px; font-weight: 500; cursor: pointer; }
+        .nav-item.active { color: #a8c7fa; }
+        .nav-icon { font-size: 22px; margin-bottom: 2px; }
+        
+        /* Thông báo nếu không mở được */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            bottom: 30px;
+            font-size: 14px;
+            transform: translateX(-50%);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <div id="play-store-ui">
+        <div class="top-nav">
+            <i class="fas fa-arrow-left"></i>
+            <i class="fas fa-ellipsis-v"></i>
+        </div>
+
+        <div class="app-header">
+            <div class="app-top">
+                <img src="https://cdn.upanhlaylink.com/i/4gq7lsCp.jpg" alt="Play Together" class="app-icon">
+                <div class="app-details">
+                    <h1>Play Together VNG beta(TRUY CẬP SỚM)</h1>
+                    <div class="app-dev">VNG | Wjilz</div>
+                    <div class="app-tags">Phiên Bản: 2.32.5</div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-uninstall">Gỡ cài đặt</button>
+                <button class="btn btn-play" onclick="moUngDung()">Chơi</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="achievement-section">
+                <h2>Thành tích mà wjilz đã đạt được</h2>
+                <div class="app-card">
+                    <div class="app-card-info">
+                        <img src="https://cdn.upanhlaylink.com/i/4gq7lsCp.jpg" alt="Play Together" class="app-card-icon">
+                        <div class="app-card-text">
+                            <h3>Play Together VNG</h3>
+                            <p>4,2 <i class="fas fa-star" style="font-size: 10px;"></i> • Mua sắm</p>
+                        </div>
+                    </div>
+                    <button class="btn-install" onclick="moUngDung()">Mở</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item"><i class="fas fa-gamepad nav-icon"></i><span>Trò chơi</span></div>
+            <div class="nav-item"><i class="fas fa-th-large nav-icon"></i><span>Ứng dụng</span></div>
+            <div class="nav-item active"><i class="fas fa-search nav-icon"></i><span>Tìm kiếm</span></div>
+            <div class="nav-item"><i class="fas fa-book nav-icon"></i><span>Sách</span></div>
+            <div class="nav-item"><i class="fas fa-user nav-icon"></i><span>Bạn</span></div>
+        </div>
+    </div>
+
+    <!-- Thông báo hướng dẫn -->
+    <div id="toast">Trình duyệt đang chặn mở App. Vui lòng bấm "Mở bằng Play Together" nếu có thông báo hiện lên!</div>
+
+    <script>
+        function moUngDung() {
+            // Tên gói chuẩn của Play Together VNG
+            var packageName = "com.vng.playtogether"; 
+            
+            // 1. Thử gọi trực tiếp bằng Intent (Cách phổ biến nhất)
+            var intentUrl = "intent://#Intent;package=" + packageName + ";scheme=vngplaytogether;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3D" + packageName + ";end";
+            
+            // Tạo một iframe ẩn để gọi Intent (Tránh bị trình duyệt chặn popup)
+            var iframe = document.createElement("iframe");
+            iframe.style.display = "none";
+            iframe.src = intentUrl;
+            document.body.appendChild(iframe);
+
+            // 2. Nếu sau 1.5 giây mà trình duyệt vẫn chưa chuyển đi (tức là bị chặn), hiện thông báo
+            setTimeout(function() {
+                // Kiểm tra xem trang có bị ẩn đi không (tức là đã chuyển sang app thành công)
+                if (!document.hidden) {
+                    var toast = document.getElementById("toast");
+                    toast.className = "show";
+                    setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+                }
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
